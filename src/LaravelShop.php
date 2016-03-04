@@ -274,7 +274,7 @@ class LaravelShop
             ],
             [
                 Config::get('shop.currency_symbol'),
-                $value,
+                sprintf("%01.2f", $value),
                 Config::get('shop.currency')
             ],
             Config::get('shop.display_price_format')
