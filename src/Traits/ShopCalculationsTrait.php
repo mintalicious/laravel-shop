@@ -25,6 +25,23 @@ trait ShopCalculationsTrait
      * @var array
      */
     private $shopCalculations = null;
+    private $extraShipping    = 0.0;
+    private $extraShippingTax = "0%";
+
+    /**
+     * Sets extra shipping in cart.
+     *
+     * @return ShopCartModel
+     */
+    public function setShippingRate($shipping, $tax = "0%") {
+        $this->extraShippingTax = $tax;
+        $this->extraShipping    = $shipping;
+
+        $this->resetCalculations();
+        $this->runCalculations();
+
+        return $this;
+    }
 
     /**
      * Returns total amount of items in cart.
@@ -60,7 +77,7 @@ trait ShopCalculationsTrait
     }
 
     /**
-     * Returns total tax of all the items in cart.
+     * Returns total shipping of all the items in cart.
      *
      * @return float
      */
@@ -68,6 +85,15 @@ trait ShopCalculationsTrait
     {
         if (empty($this->shopCalculations)) $this->runCalculations();
         return round($this->shopCalculations->totalShipping, 2);
+    }
+
+    /**
+     * Returns shipping tax of extra shipping in cart.
+     *
+     * @return string
+     */
+    public function getShippingTaxAttribute() {
+        return $this->extraShippingTax;
     }
 
     /**
@@ -173,6 +199,9 @@ trait ShopCalculationsTrait
             )
             ->where($this->table . '.id', $this->attributes['id'])
             ->first();
+            
+        $this->shopCalculations->totalShipping = $this->extraShipping;
+
         if (Config::get('shop.cache_calculations')) {
             Cache::put(
                 $cacheKey,
